@@ -1,0 +1,28 @@
+# Stage 1: Composer Installation
+
+FROM composer:latest AS composer
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install
+
+# Stage 2: Application Runtime
+
+FROM php:apache
+WORKDIR /var/www/html
+COPY --from=composer /app/vendor ./vendor
+COPY . .
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+RUN a2enmod rewrite
+RUN chown -R www-data:www-data /var/www/html
+
+FROM mysql
+COPY ./db /docker-entrypoint-initdb.d
+ENV MYSQL_DATABASE=db_sampah_4
+ENV MYSQL_USER=lestari
+ENV MYSQL_PASSWORD=password
+ENV MYSQL_ALLOW_EMPTY_PASSWORD=1
+
+FROM phpmyadmin/phpmyadmin
+ENV PMA_HOST=db
+ENV PMA_PORT=3306

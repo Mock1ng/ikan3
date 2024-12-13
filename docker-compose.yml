@@ -1,0 +1,21 @@
+services:
+  www: # nama service web utama
+    build: .
+    ports:
+      - 80:80
+  db: # nama service database
+    image: mysql:latest # image untuk mysql
+    environment: # variable untuk mysql
+      - MYSQL_DATABASE=db_sampah_4
+      - MYSQL_USER=lestari
+      - MYSQL_PASSWORD=password
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+    volumes: # mapping file sqldari host (folder servernya) ke container
+      - ./db:/docker-entrypoint-initdb.d
+  phpmyadmin: # nama service phpmyadmin
+    image: phpmyadmin/phpmyadmin # image untuk phpmyadmin
+    ports:
+      - 8001:80
+    environment:
+    PMA_HOST: db
+    PMA_PORT: 3306
